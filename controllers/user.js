@@ -36,19 +36,12 @@ const postUser = async (req, res) => {
 }
 
 const getUser = async (req, res) => {
-    const users = await User.find();
+    const users = await User.find().select("password");
 
     res.status(200).json({
         success: true,
         message: "All User fetched",
-        users: users.map(user => ({
-            Name: user.Name,
-            email: user.email,
-            Age: user.Age,
-            Address: user.Address,
-            _id: user._id,
-            _v: user._v
-        }))
+        users: users
     })
 }
 
@@ -82,36 +75,34 @@ const getUserI = async (req, res) => {
 }
 
 const updateUser = async (req, res) => {
-    const { Name, email, password, Age, Address } = req.body;
-    const user = await User.findById(req.params.id)
+    const { Name, email, Age, Address } = req.body;
 
-    if(!user){
+    const {id} = req.params;
+
+    await User.updateOne({_id : id},{
+        $set : {
+            Name : Name,
+            email : email,
+            Age : Age,
+            Address : Address
+        }
+    })
+
+   const updatedUser = await User.findById(id)
+
+    res.status(200).json({
+        success : true,
+        message : 'User updated successfully !',
+        data : updatedUser
+    })
+    
+    if(!id){
         return res.status(404).json({
             success : false,
             data : null,
             message : "user not found"
         })
     }
-    
-    user.Name = Name || user.Name
-    user.email = email || user.email
-    user.Age = Age || user.Age
-    user.Address = Address || user.Address
-    if(password){
-        user.password = password || user.password
-        return res.status(400).json({
-            success : false,
-            data : null,
-            message : 'Password can not be updated'
-        })
-    }
-    await user.save()
-
-    res.status(200).json({
-        success : true,
-        message : 'User updated successfully !',
-        user : user
-    })
 }
 
 const deleteUser = async (req, res) => {

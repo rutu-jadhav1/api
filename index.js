@@ -23,7 +23,7 @@ app.get('/allUser',getUser)
 app.get('/getUserI/:id', getUserI)
 app.put('/updateUser/:id', updateUser)
 app.delete('/deleteUser/:id',deleteUser)
-app.get('/login', userLogin)
+app.post('/login', userLogin)
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, ()=>{
