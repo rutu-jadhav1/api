@@ -6,6 +6,10 @@ const hashPassword = async (password) => {
     return await bcrypt.hash(password, saltRounds)
 }
 
+const { createRequire } = await import('module');
+const require = createRequire(import.meta.url);
+const jwt = require('jsonwebtoken');
+
 const postUser = async (req, res) => {
     const { Name, email, password, Age, Address,role } = req.body
 
@@ -39,11 +43,18 @@ const postUser = async (req, res) => {
 const getUser = async (req, res) => {
     const users = await User.find().select("-password");
 
+    const tokens = users.map(user => {
+        return jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
+    });
+
     res.status(200).json({
         success: true,
-        message: "All User fetched",
-        users: users
-    })
+        message: "All Users fetched with tokens",
+        users: users.map((user, index) => ({
+            ...user.toObject(),
+            token: tokens[index]
+        }))
+    });
 }
 
 const getUserI = async (req, res) => {
@@ -51,6 +62,15 @@ const getUserI = async (req, res) => {
     console.log("userID", id)
 
     const user = await User.findById(id);
+    if (!user) {
+        return res.status(404).json({
+            success: false,
+            data: null,
+            message: "User not found"
+        });
+    }
+
+    const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
 
     const userData = {
         Name: user.Name,
@@ -59,6 +79,7 @@ const getUserI = async (req, res) => {
         Age: user.Age,
         Address: user.Address,
         role: user.role,
+        token: token,
         _id: user._id,
         _v: user._v
     }
@@ -72,7 +93,7 @@ const getUserI = async (req, res) => {
     res.status(200).json({
         success: true,
         data: userData,
-        message: "All User fetched"
+        message: "User fetched"
     })
 }
 
