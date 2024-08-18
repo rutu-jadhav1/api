@@ -7,14 +7,15 @@ const hashPassword = async (password) => {
 }
 
 const postUser = async (req, res) => {
-    const { Name, email, password, Age, Address } = req.body
+    const { Name, email, password, Age, Address,role } = req.body
 
     const user = new User({
         Name,
         email,
         password: await hashPassword(password),
         Age,
-        Address
+        Address,
+        role
     })
     try {
         const savedUser = await user.save();

@@ -21,6 +21,12 @@ const userSchema = new Schema({
     Address : {
         type : String,
         require : true
+    },
+    role : {
+        type : String,
+        enum : ["user", "admin"],
+        default : "user",
+        required : true
     }
 },{
     timestamps : true
