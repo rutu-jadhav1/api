@@ -58,6 +58,7 @@ const getUserI = async (req, res) => {
         password: await hashPassword(user.password),
         Age: user.Age,
         Address: user.Address,
+        role: user.role,
         _id: user._id,
         _v: user._v
     }
